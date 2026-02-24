@@ -4,6 +4,8 @@ import Exercise from "./Exercise";
 import Card from "./Card";
 import Button from "./Button";
 import Food from "./Food";
+import SimpleCaptcha from "./Captcha";
+import ProgressBAr from "./ProgressBar";
 
 function App() {
   return (
@@ -11,16 +13,22 @@ function App() {
       <Header />
       <Exercise /> 
       <Card />
-      <Button />
+      <Button name="Yoga" />
+      <Button name="Running" />
+      <Button name="Swimming" />
+
       <Food name="Pizza"
             description="Delicious cheesy pizza with various toppings. T T" 
             calories={true} />
-       <Food name="Salad"
+      <Food name="Salad"
             description="Fresh and healthy salad with a variety of vegetables." 
             calories={false} />
-        <Food name="Smoothie"
-             
-            calories={false} />
+      <Food name="Smoothie"/>
+
+      <p1 className = "text-inapp">Total calories / per day(max = 2000)</p1>
+      <ProgressBAr percentage={75} />
+      
+      <SimpleCaptcha onVerify={(isVerified) => console.log("Captcha Verified:", isVerified)} />
       <Footer />
     </div>
   );

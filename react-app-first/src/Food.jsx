@@ -1,12 +1,16 @@
 
 function Food(props) {
+    const foodName = props.name || "Unknown Food";
+    const foodDescription = props.description || "No description available.";
+    const foodCategory = props.calories === true ? "High-Calorie" : props.calories === false ? "Low-Calorie" : "Unknown Category";
+
     
     return (
-        <div className="food">
-            <h2>{props.name || "Unknown Food"}</h2>
-            <p>{props.description || "No description available."}</p>
-            <p>Calories: {props.calories === true ? "over 500" : props.calories === false ? "under 500" : "Unknown"}</p>
-        </div>
+            <div className="food">
+            <h2>{foodName}</h2>
+            <p>{foodDescription}</p>
+            <p>Calories: {foodCategory}</p>
+            </div>
     );
 }
 

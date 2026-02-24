@@ -1,7 +1,7 @@
 function Header() {
     return (
         <header className ="header">
-            <h1>My first React App</h1>
+            <h1 className = "header-title">My first React App</h1>
             <nav>
                 <ul>
                     <li><a href="#home">Home</a></li>

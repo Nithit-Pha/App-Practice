@@ -1,13 +1,28 @@
+.text-inapp {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  color: hsl(0, 0%, 20%);
+  font-size: 1.1em;
+  margin: 20px;
+}
+
 .header {
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
   background-color: hsl(0, 0%, 90%);
   padding: 20px;
+  text-align: left;
+}
+
+.header-title {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 1.7em;
+  color: hsl(0, 0%, 30%);
+  margin: 0;  
   text-align: center;
 }
 
 .exercise {
   font-family: 'Arial', sans-serif;
-  font-size: 1em;
+  font-size: 0.8em;
   color: hsl(0, 0%, 30%);
   margin: 20px;
   border: 1px solid hsl(0, 0%, 50%);
