@@ -1,0 +1,54 @@
+.header {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  background-color: hsl(0, 0%, 90%);
+  padding: 20px;
+  text-align: center;
+}
+
+.exercise {
+  font-family: 'Arial', sans-serif;
+  font-size: 1em;
+  color: hsl(0, 0%, 30%);
+  margin: 20px;
+  border: 1px solid hsl(0, 0%, 50%);
+  padding: 10px;
+}
+
+.card {
+  border: 1px solid hsl(0, 0%, 55%);
+  border-radius: 5px;
+  box-shadow: 5px 5px 10px hsla(0, 0%, 40%, 0.205);
+  padding: 20px;
+  margin: 10px;
+  text-align: left;
+  max-width: 250px ;
+  display: inline-block;
+}
+
+.card .card-img{
+  max-width: 70%;
+  height: auto;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.card .card-title {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  margin: 0;
+  font-size: 1.2em;
+  color: aquamarine;
+}
+
+.card .card-description {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: hsl(0, 0%, 40%);
+  font-size: 0.9em;
+}
+
+.food {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 1em;
+  padding: 10px;
+  border: 1px solid hsla(0, 0%, 0%, 0.75);
+  flex-wrap: wrap;
+}
