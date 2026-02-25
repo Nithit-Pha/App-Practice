@@ -13,9 +13,8 @@ function App() {
       <Header />
       <Exercise /> 
       <Card />
-      <Button name="Yoga" />
-      <Button name="Running" />
-      <Button name="Swimming" />
+      <Button name="Yoga" id={1} initialStatus={false} />
+      <Button name="Lunch" id={2} initialStatus={true} />
 
       <Food name="Pizza"
             description="Delicious cheesy pizza with various toppings. T T" 
