@@ -1,4 +1,4 @@
-import Yoga from './assets/yoga.png';
+import Yoga from '../assets/yoga.png';
 
 function Card() {
     return (
@@ -7,7 +7,7 @@ function Card() {
             <h2 className="card-title">Yoga</h2>
             <p className="card-description"> at Morning</p>
         </div>
-    )
+    );
 }
 
 export default Card;
