@@ -7,9 +7,9 @@ function Food(props) {
     
     return (
             <div className="food">
-            <h2>{foodName}</h2>
-            <p>{foodDescription}</p>
-            <p>Calories: {foodCategory}</p>
+                <h2>{foodName}</h2>
+                <p>{foodDescription}</p>
+                <p>Calories: {foodCategory}</p>
             </div>
     );
 }
