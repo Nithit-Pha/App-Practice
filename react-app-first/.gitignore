@@ -29,3 +29,6 @@ dist-ssr
 .env.test
 .env.production
 
+# Claude Code workspace (settings, worktrees, etc.)
+.claude/
+
