@@ -1,68 +1,70 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const SimpleCaptcha = ({ onVerify }) => {
+// Server-issued CAPTCHA. The component fetches a challenge {id, text} from
+// the API and reports the user's typed answer back to the parent via
+// `onChange({ id, answer })`. Verification happens on the server when the
+// auth form is submitted — never trust a client-side captcha check.
+const SimpleCaptcha = ({ onChange }) => {
+  const [captchaId, setCaptchaId] = useState(null);
   const [captchaText, setCaptchaText] = useState('');
   const [userInput, setUserInput] = useState('');
   const [error, setError] = useState('');
-  const [verified, setVerified] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Function to generate a random string for CAPTCHA
-  const generateCaptcha = () => {
-    const chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    let result = "";
-    for (let i = 0; i < 6; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setCaptchaText(result);
-    setUserInput('');
+  const fetchCaptcha = async () => {
+    setLoading(true);
     setError('');
-    setVerified(false);
-    if (onVerify) onVerify(false); // notify parent that previous verification is invalidated
+    setUserInput('');
+    if (onChange) onChange({ id: null, answer: '' });
+    try {
+      const res = await fetch('http://localhost:5000/api/captcha');
+      if (!res.ok) throw new Error('Bad response');
+      const data = await res.json();
+      setCaptchaId(data.id);
+      setCaptchaText(data.text);
+      if (onChange) onChange({ id: data.id, answer: '' });
+    } catch (e) {
+      setCaptchaId(null);
+      setCaptchaText('');
+      setError('Could not load captcha. Is the API running?');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    generateCaptcha();
+    fetchCaptcha();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleVerify = () => {
-    if (userInput === captchaText) {
-      setVerified(true);
-      setError('');
-      if (onVerify) onVerify(true);
-    } else {
-      setVerified(false);
-      setError('Incorrect CAPTCHA, please try again.');
-      if (onVerify) onVerify(false);
-      generateCaptcha();
-    }
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setUserInput(value);
+    if (onChange) onChange({ id: captchaId, answer: value });
   };
 
   return (
     <div style={styles.container}>
       <div style={styles.captchaBox}>
-        <span style={styles.code}>{captchaText}</span>
-        <button type="button" onClick={generateCaptcha} style={styles.refreshBtn}>
+        <span style={styles.code}>{loading ? '...' : captchaText}</span>
+        <button
+          type="button"
+          onClick={fetchCaptcha}
+          style={styles.refreshBtn}
+          title="Get a new captcha"
+        >
           🔄
         </button>
       </div>
 
       <input
         type="text"
-        placeholder="Enter the code"
+        placeholder="Enter the code above"
         value={userInput}
-        onChange={(e) => setUserInput(e.target.value)}
-        disabled={verified}
+        onChange={handleInputChange}
         style={styles.input}
+        autoComplete="off"
       />
-      <button
-        type="button"
-        onClick={handleVerify}
-        disabled={verified}
-        style={verified ? { ...styles.submitBtn, ...styles.verifiedBtn } : styles.submitBtn}
-      >
-        {verified ? '✓ Verified' : 'Verify'}
-      </button>
 
       {error && <p style={{ color: 'red', fontSize: '12px', margin: '6px 0 0' }}>{error}</p>}
     </div>
@@ -81,9 +83,7 @@ const styles = {
   },
   code: { letterSpacing: '5px', fontWeight: 'bold', fontStyle: 'italic', fontSize: '20px', userSelect: 'none' },
   refreshBtn: { border: 'none', background: 'none', cursor: 'pointer', fontSize: '16px' },
-  input: { width: '100%', padding: '8px', marginBottom: '8px', boxSizing: 'border-box' },
-  submitBtn: { width: '100%', padding: '8px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-  verifiedBtn: { backgroundColor: '#28a745', cursor: 'default' }
+  input: { width: '100%', padding: '8px', boxSizing: 'border-box' },
 };
 
 export default SimpleCaptcha;

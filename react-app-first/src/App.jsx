@@ -8,6 +8,10 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ExercisePage from "./pages/ExercisePage";
 import FoodPage from "./pages/FoodPage";
+import CookingPage from "./pages/CookingPage";
+import HainaneseChickenRice from "./pages/recipes/HainaneseChickenRice";
+import AdminUsers from "./pages/AdminUsers";
+import RequireRole from "./auth/RequireRole";
 
 function App() {
   return (
@@ -20,8 +24,18 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/exercise" element={<ExercisePage />} />
         <Route path="/food" element={<FoodPage />} />
+        <Route path="/cooking" element={<CookingPage />} />
+        <Route path="/cooking/hainanese-chicken-rice" element={<HainaneseChickenRice />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route
+          path="/admin/users"
+          element={
+            <RequireRole role="admin">
+              <AdminUsers />
+            </RequireRole>
+          }
+        />
         <Route path="*" element={<h2>Page Not Found</h2>} />
       </Routes>
       

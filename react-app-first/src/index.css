@@ -49,6 +49,27 @@
   color: hsl(210, 70%, 45%);
 }
 
+.nav-user-greeting {
+  color: hsl(0, 0%, 35%);
+  font-weight: 500;
+}
+
+.nav-logout-btn {
+  background: none;
+  border: 1px solid hsl(0, 0%, 70%);
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 0.95em;
+  color: hsl(0, 0%, 25%);
+}
+
+.nav-logout-btn:hover {
+  background-color: hsl(0, 0%, 92%);
+  color: hsl(0, 70%, 45%);
+  border-color: hsl(0, 70%, 45%);
+}
+
 .exercise {
   font-family: 'Arial', sans-serif;
   font-size: 0.8em;
@@ -258,6 +279,10 @@
   border-top: 4px solid hsl(30, 80%, 55%);
 }
 
+.hero-card-cooking {
+  border-top: 4px solid hsl(0, 70%, 55%);
+}
+
 /* ---------- Exercise / Food sub-pages ---------- */
 .healthy-page {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -301,4 +326,125 @@
 
 .healthy-page-back a:hover {
   text-decoration: underline;
+}
+
+/* ---------- Cooking list & recipe pages ---------- */
+.recipe-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.recipe-list-link {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 18px;
+  border: 1px solid hsl(0, 0%, 85%);
+  border-left: 4px solid hsl(0, 70%, 55%);
+  border-radius: 8px;
+  background-color: hsl(0, 0%, 99%);
+  text-decoration: none;
+  color: hsl(0, 0%, 20%);
+  transition: transform 200ms, box-shadow 200ms;
+}
+
+.recipe-list-thumb {
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.recipe-list-body {
+  flex: 1;
+}
+
+.recipe-list-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px hsla(0, 0%, 0%, 0.08);
+}
+
+.recipe-list-link h2 {
+  margin: 0 0 6px;
+  font-size: 1.3em;
+}
+
+.recipe-list-link p {
+  margin: 0 0 10px;
+  color: hsl(0, 0%, 40%);
+  line-height: 1.4;
+}
+
+.recipe-hero-img {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  margin: 16px auto 8px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px hsla(0, 0%, 0%, 0.12);
+}
+
+.recipe-page .recipe-section-title {
+  font-family: 'Times New Roman', Times, serif;
+  margin: 28px 0 8px;
+  color: hsl(150, 40%, 28%);
+  border-bottom: 2px solid hsl(0, 70%, 55%);
+  padding-bottom: 4px;
+}
+
+.recipe-page .recipe-step-title {
+  margin: 18px 0 8px;
+  color: hsl(0, 0%, 25%);
+}
+
+.recipe-steps {
+  padding-left: 22px;
+  margin: 0 0 12px;
+  line-height: 1.6;
+  color: hsl(0, 0%, 25%);
+}
+
+.recipe-steps li {
+  margin-bottom: 6px;
+}
+
+.recipe-tip {
+  background-color: hsl(45, 90%, 94%);
+  border-left: 4px solid hsl(45, 80%, 55%);
+  padding: 10px 14px;
+  margin: 12px 0 0;
+  border-radius: 4px;
+  color: hsl(0, 0%, 25%);
+  line-height: 1.5;
+}
+
+/* ---------- Admin table ---------- */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.95em;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid hsl(0, 0%, 88%);
+  text-align: left;
+}
+
+.admin-table thead th {
+  background-color: hsl(0, 0%, 96%);
+  color: hsl(0, 0%, 30%);
+  font-weight: 600;
+}
+
+.admin-table tbody tr:hover {
+  background-color: hsl(0, 0%, 98%);
 }

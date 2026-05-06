@@ -23,12 +23,81 @@ dist-ssr
 *.sln
 *.sw?
 
+# ---------- Secrets & credentials ----------
+# Catch every flavour of .env, but keep the committed example file.
 .env
-.env.local
-.env.development
-.env.test
-.env.production
+.env.*
+!.env.example
+!.env.example.*
 
-# Claude Code workspace (settings, worktrees, etc.)
+# Anything that smells like a credential
+secrets/
+*.secret
+*.secrets
+
+# Private keys, certs, key material
+*.pem
+*.key
+*.crt
+*.cer
+*.csr
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.gpg
+*.pgp
+*.asc
+id_rsa
+id_rsa.pub
+id_dsa
+id_dsa.pub
+id_ecdsa
+id_ecdsa.pub
+id_ed25519
+id_ed25519.pub
+
+# ---------- Local databases (in case any escape /database) ----------
+*.sqlite
+*.sqlite3
+*.db
+*-journal
+*.db-journal
+*.db-wal
+*.db-shm
+
+# ---------- Build / cache / coverage ----------
+coverage/
+.nyc_output/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+.vite/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+.cache/
+.parcel-cache/
+.turbo/
+
+# ---------- OS metadata ----------
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ---------- Backups & swap files ----------
+*.bak
+*.backup
+*.orig
+*~
+
+# ---------- Local history / AI assistants ----------
+.history/
+.aider*
+.cursorignore
+.continue/
+
+# ---------- Claude Code workspace (settings, worktrees, etc.) ----------
 .claude/
 

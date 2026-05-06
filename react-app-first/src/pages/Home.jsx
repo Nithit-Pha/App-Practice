@@ -23,6 +23,12 @@ function Home() {
           <p>Choose balanced meals and track your daily calories.</p>
           <span className="hero-card-cta">Eat better &rarr;</span>
         </Link>
+
+        <Link to="/cooking" className="hero-card hero-card-cooking">
+          <h2>Cooking</h2>
+          <p>Cook healthy meals at home with simple, step-by-step recipes.</p>
+          <span className="hero-card-cta">Browse recipes &rarr;</span>
+        </Link>
       </section>
     </main>
   );
