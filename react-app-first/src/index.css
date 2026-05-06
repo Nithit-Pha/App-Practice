@@ -179,3 +179,126 @@
   text-align: center;
   color: hsl(0, 0%, 40%);
 }
+
+/* ---------- Home: "Want to be healthy?" ---------- */
+.home-hero {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.hero-banner {
+  max-width: 720px;
+  margin: 0 auto 40px;
+}
+
+.hero-title {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 2.6em;
+  margin: 0 0 12px;
+  color: hsl(150, 40%, 28%);
+}
+
+.hero-subtitle {
+  font-size: 1.1em;
+  color: hsl(0, 0%, 35%);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.hero-cards {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.hero-card {
+  flex: 1 1 320px;
+  max-width: 380px;
+  padding: 28px 24px;
+  border-radius: 12px;
+  border: 1px solid hsl(0, 0%, 85%);
+  background-color: hsl(0, 0%, 99%);
+  box-shadow: 0 4px 14px hsla(0, 0%, 0%, 0.06);
+  text-decoration: none;
+  color: hsl(0, 0%, 20%);
+  text-align: left;
+  transition: transform 200ms, box-shadow 200ms;
+}
+
+.hero-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 22px hsla(0, 0%, 0%, 0.12);
+}
+
+.hero-card h2 {
+  margin: 0 0 8px;
+  font-size: 1.6em;
+}
+
+.hero-card p {
+  margin: 0 0 14px;
+  color: hsl(0, 0%, 40%);
+  line-height: 1.4;
+}
+
+.hero-card-cta {
+  font-weight: 600;
+  color: hsl(210, 70%, 45%);
+}
+
+.hero-card-exercise {
+  border-top: 4px solid hsl(150, 60%, 45%);
+}
+
+.hero-card-food {
+  border-top: 4px solid hsl(30, 80%, 55%);
+}
+
+/* ---------- Exercise / Food sub-pages ---------- */
+.healthy-page {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 30px 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.healthy-page-title {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 2.2em;
+  color: hsl(150, 40%, 28%);
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.healthy-page-lead {
+  text-align: center;
+  color: hsl(0, 0%, 35%);
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
+.food-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.healthy-page-back {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 0.95em;
+}
+
+.healthy-page-back a {
+  color: hsl(210, 70%, 45%);
+  text-decoration: none;
+}
+
+.healthy-page-back a:hover {
+  text-decoration: underline;
+}

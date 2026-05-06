@@ -1,32 +1,29 @@
-import React from 'react';
-import Exercise from "../components/Exercise";
-import Card from "../components/Card";
-import Button from "../components/Button";
-import Food from "../components/Food";
-import SimpleCaptcha from "../components/Captcha";
-import ProgressBAr from "../components/ProgressBar";
+import { Link } from 'react-router-dom';
 
 function Home() {
   return (
-    <main>
-      <Exercise /> 
-      <Card />
-      <div className="button-group">
-        <Button name="Yoga" id={1} initialStatus={false} />
-        <Button name="Lunch" id={2} initialStatus={true} />
-      </div>
+    <main className="home-hero">
+      <section className="hero-banner">
+        <h1 className="hero-title">Want to be healthy?</h1>
+        <p className="hero-subtitle">
+          Small daily choices build a stronger you. Move your body, eat well,
+          and feel the difference — one habit at a time.
+        </p>
+      </section>
 
-      <Food name="Pizza"
-            description="Delicious cheesy pizza with various toppings." 
-            calories={true} />
-      <Food name="Salad"
-            description="Fresh and healthy salad." 
-            calories={false} />
-      
-      <p className="text-inapp">Total calories / per day (max = 2000)</p>
-      <ProgressBAr percentage={75} />
-      
-      <SimpleCaptcha onVerify={(isVerified) => console.log("Verified:", isVerified)} />
+      <section className="hero-cards">
+        <Link to="/exercise" className="hero-card hero-card-exercise">
+          <h2>Exercise</h2>
+          <p>Plan your daily workouts — yoga, running, swimming and more.</p>
+          <span className="hero-card-cta">Start moving &rarr;</span>
+        </Link>
+
+        <Link to="/food" className="hero-card hero-card-food">
+          <h2>Food</h2>
+          <p>Choose balanced meals and track your daily calories.</p>
+          <span className="hero-card-cta">Eat better &rarr;</span>
+        </Link>
+      </section>
     </main>
   );
 }

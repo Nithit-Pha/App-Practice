@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import SimpleCaptcha from '../components/Captcha';
 
 function Signup() {
     const navigate = useNavigate();
@@ -11,6 +12,7 @@ function Signup() {
     const [message, setMessage] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [captchaVerified, setCaptchaVerified] = useState(false);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -20,6 +22,12 @@ function Signup() {
         e.preventDefault();
         setError(null);
         setMessage(null);
+
+        if (!captchaVerified) {
+            setError('Please complete the CAPTCHA verification first.');
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -82,7 +90,9 @@ function Signup() {
                     />
                 </label>
 
-                <button type="submit" disabled={loading}>
+                <SimpleCaptcha onVerify={setCaptchaVerified} />
+
+                <button type="submit" disabled={loading || !captchaVerified}>
                     {loading ? 'Creating...' : 'Create Account'}
                 </button>
 
