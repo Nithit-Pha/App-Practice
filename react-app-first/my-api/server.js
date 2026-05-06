@@ -10,9 +10,12 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const pinoHttp = require('pino-http');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Database = require('better-sqlite3');
+
+const { logger, audit } = require('./logger');
 
 const {
     signupBody,
@@ -27,11 +30,10 @@ const {
 // the first user request.
 const envResult = envSchema.safeParse(process.env);
 if (!envResult.success) {
-    console.error('[fatal] Invalid environment configuration:');
-    for (const issue of envResult.error.issues) {
-        console.error(`  - ${issue.path.join('.')}: ${issue.message}`);
-    }
-    console.error('See my-api/.env.example for the required variables.');
+    logger.fatal(
+        { issues: envResult.error.issues },
+        'Invalid environment configuration. See my-api/.env.example.'
+    );
     process.exit(1);
 }
 const env = envResult.data;
@@ -71,6 +73,35 @@ const cookieOptions = {
     path: '/',
     maxAge: 60 * 60 * 1000, // 1 hour
 };
+
+// ---------- Request logging ----------
+// pino-http logs every request as a structured JSON line: method, url,
+// status, response time, plus a request id we generate ourselves so a
+// single request can be traced through every log line it produces.
+//
+// IMPORTANT: this runs *before* every other middleware so even rejected
+// requests (rate-limited, CORS-blocked, body-too-big) get logged.
+app.use(
+    pinoHttp({
+        logger,
+        // Use existing X-Request-Id header (if a load balancer set one)
+        // or generate our own. Hex from crypto avoids predictable IDs.
+        genReqId: (req) =>
+            req.headers['x-request-id'] || crypto.randomBytes(8).toString('hex'),
+        // Map status codes to log levels: 5xx=error, 4xx=warn, else=info.
+        customLogLevel: (req, res, err) => {
+            if (err || res.statusCode >= 500) return 'error';
+            if (res.statusCode >= 400) return 'warn';
+            return 'info';
+        },
+        // Decorate each "request completed" line with extra fields. Once
+        // requireAuth runs, req.user is populated, so we get userId on
+        // authenticated requests for free.
+        customProps: (req) => ({
+            userId: req.user?.id,
+        }),
+    })
+);
 
 // ---------- Security headers (helmet) ----------
 // helmet sets a bundle of HTTP response headers that close off whole
@@ -118,6 +149,18 @@ app.use(cookieParser());
 
 const skipPreflight = (req) => req.method === 'OPTIONS';
 
+// Reusable handler so every rate-limit hit is logged + audited identically.
+function makeLimitHandler(name) {
+    return (req, res, _next, options) => {
+        audit(req, {
+            event: 'ratelimit.triggered',
+            limiter: name,
+            path: req.originalUrl,
+        });
+        res.status(options.statusCode).json(options.message);
+    };
+}
+
 // Login: highest-value target. 5 attempts per 15 minutes per IP.
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -126,6 +169,7 @@ const loginLimiter = rateLimit({
     legacyHeaders: false,         // skip legacy X-RateLimit-* headers
     skip: skipPreflight,
     message: { error: 'Too many login attempts. Try again in 15 minutes.' },
+    handler: makeLimitHandler('login'),
 });
 
 // Signup: slow bot account creation, but legitimate users rarely sign up
@@ -137,6 +181,7 @@ const signupLimiter = rateLimit({
     legacyHeaders: false,
     skip: skipPreflight,
     message: { error: 'Too many sign-up attempts. Try again later.' },
+    handler: makeLimitHandler('signup'),
 });
 
 // Captcha is fetched on every login/signup page load and on every failed
@@ -147,15 +192,18 @@ const captchaLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     skip: skipPreflight,
+    handler: makeLimitHandler('captcha'),
 });
 
 // Generic limiter for everything else as a safety net.
+// Skip /healthz so uptime monitors can hammer it without tripping the limit.
 const generalLimiter = rateLimit({
     windowMs: 60 * 1000,
     max: 120,
     standardHeaders: true,
     legacyHeaders: false,
-    skip: skipPreflight,
+    skip: (req) => skipPreflight(req) || req.path === '/healthz',
+    handler: makeLimitHandler('general'),
 });
 app.use(generalLimiter);
 
@@ -184,16 +232,28 @@ function clearAuthCookie(res) {
 // or rely on the token claims plus periodic re-issue.
 function requireAuth(req, res, next) {
     const token = req.cookies[AUTH_COOKIE];
-    if (!token) return res.status(401).json({ error: 'Not authenticated.' });
+    if (!token) {
+        req.log.warn({ event: 'auth.missing_cookie' }, 'Request without auth cookie');
+        return res.status(401).json({ error: 'Not authenticated.' });
+    }
     try {
         const payload = jwt.verify(token, JWT_SECRET);
         const user = db
             .prepare('SELECT id, name, email, role FROM users WHERE id = ?')
             .get(payload.sub);
-        if (!user) return res.status(401).json({ error: 'User no longer exists.' });
+        if (!user) {
+            // Cookie was valid but user is gone (deleted account). Treat as
+            // a security event — someone is using a token whose subject
+            // no longer exists.
+            audit(req, { event: 'auth.user_gone', sub: payload.sub });
+            return res.status(401).json({ error: 'User no longer exists.' });
+        }
         req.user = user;
         next();
     } catch (err) {
+        // Bad signature or expired token. Worth logging at warn — could be
+        // a stolen-token replay attempt or just a stale tab.
+        req.log.warn({ event: 'auth.bad_token', reason: err.message }, 'JWT verification failed');
         return res.status(401).json({ error: 'Invalid or expired session.' });
     }
 }
@@ -202,6 +262,14 @@ function requireAuth(req, res, next) {
 function requireRole(role) {
     return (req, res, next) => {
         if (!req.user || req.user.role !== role) {
+            // 403s are gold for spotting probing — an authenticated user
+            // trying admin endpoints repeatedly is interesting.
+            audit(req, {
+                event: 'auth.forbidden',
+                requiredRole: role,
+                actualRole: req.user?.role,
+                path: req.originalUrl,
+            });
             return res.status(403).json({ error: 'Forbidden.' });
         }
         next();
@@ -224,13 +292,16 @@ function validate(schemas) {
             if (!schemas[key]) continue;
             const result = schemas[key].safeParse(req[key]);
             if (!result.success) {
-                return res.status(400).json({
-                    error: 'Invalid request.',
-                    details: result.error.issues.map((i) => ({
-                        path: [key, ...i.path].join('.'),
-                        message: i.message,
-                    })),
-                });
+                const details = result.error.issues.map((i) => ({
+                    path: [key, ...i.path].join('.'),
+                    message: i.message,
+                }));
+                // Floods of 400s from one IP usually = fuzzing/scanning.
+                req.log.warn(
+                    { event: 'validation.failed', path: req.originalUrl, details },
+                    'Request body did not match schema'
+                );
+                return res.status(400).json({ error: 'Invalid request.', details });
             }
             req[key] = result.data;
         }
@@ -327,11 +398,17 @@ app.post('/api/signup', signupLimiter, validate({ body: signupBody }), (req, res
     const { name, email, password, captchaId, captchaAnswer } = req.body;
 
     if (!verifyAndConsumeCaptcha(captchaId, captchaAnswer)) {
+        // Don't leak email here — captcha failures are noisy and
+        // the address adds little forensic value at this stage.
+        audit(req, { event: 'signup.captcha_failed' });
         return res.status(400).json({ error: 'Captcha verification failed. Please try again.' });
     }
 
     const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
     if (existing) {
+        // Useful for spotting account-enumeration scans (lots of these
+        // from one IP = someone is checking which emails are registered).
+        audit(req, { event: 'signup.duplicate_email', email });
         return res.status(409).json({ error: 'Email is already registered.' });
     }
 
@@ -341,6 +418,13 @@ app.post('/api/signup', signupLimiter, validate({ body: signupBody }), (req, res
     const result = db
         .prepare('INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)')
         .run(name, email, hashed, userRole);
+
+    audit(req, {
+        event: 'signup.success',
+        newUserId: result.lastInsertRowid,
+        email,
+        role: userRole,
+    });
 
     res.status(201).json({
         message: 'Account created.',
@@ -353,11 +437,22 @@ app.post('/api/login', loginLimiter, validate({ body: loginBody }), (req, res) =
     const { email, password, captchaId, captchaAnswer } = req.body;
 
     if (!verifyAndConsumeCaptcha(captchaId, captchaAnswer)) {
+        audit(req, { event: 'login.captcha_failed', email });
         return res.status(400).json({ error: 'Captcha verification failed. Please try again.' });
     }
 
     const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
     if (!user || !bcrypt.compareSync(password, user.password)) {
+        // We log a single 'login.failure' regardless of whether the email
+        // existed or the password was wrong — the response to the client
+        // is also identical, to avoid leaking which case it was. The audit
+        // log is the only place that can tell them apart, and only via
+        // an internal `accountExists` flag for forensic use.
+        audit(req, {
+            event: 'login.failure',
+            email,
+            accountExists: !!user,
+        });
         return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
@@ -366,6 +461,8 @@ app.post('/api/login', loginLimiter, validate({ body: loginBody }), (req, res) =
     // each request to this origin.
     const token = signAuthToken(user);
     setAuthCookie(res, token);
+
+    audit(req, { event: 'login.success', userId: user.id, role: user.role });
 
     res.json({
         message: 'Login successful.',
@@ -385,7 +482,19 @@ app.get('/api/me', requireAuth, (req, res) => {
 // but the browser no longer holds it. For revocation before expiry you'd
 // need a token blocklist — a future lab.
 app.post('/api/logout', (req, res) => {
+    // We try to read the cookie before clearing so the audit log captures
+    // who logged out. Failures here are non-fatal — we still clear and 200.
+    let userId;
+    try {
+        const token = req.cookies[AUTH_COOKIE];
+        if (token) {
+            const payload = jwt.verify(token, JWT_SECRET);
+            userId = payload.sub;
+        }
+    } catch { /* ignore — bad token is fine on logout */ }
+
     clearAuthCookie(res);
+    audit(req, { event: 'logout', userId });
     res.json({ message: 'Logged out.' });
 });
 
@@ -399,8 +508,39 @@ app.get('/api/users', requireAuth, requireRole('admin'), (req, res) => {
     res.json(rows);
 });
 
+// ---------- Health check ----------
+// Lightweight probe for uptime monitors and load balancers. Does a trivial
+// DB ping so a broken database registers as unhealthy. Excluded from the
+// general rate limiter above so a 1-per-minute uptime monitor can hammer
+// it without tripping anything.
+//
+// Convention: /healthz uses a 'z' so it doesn't collide with any real
+// product route. Originated at Google. Returns 200 when alive, 503 when
+// something downstream is broken.
+app.get('/healthz', (req, res) => {
+    try {
+        const row = db.prepare('SELECT 1 AS ok').get();
+        if (row?.ok !== 1) throw new Error('Unexpected DB result');
+        return res.json({ status: 'ok' });
+    } catch (err) {
+        req.log.error({ err }, 'Health check failed');
+        return res.status(503).json({ status: 'unhealthy' });
+    }
+});
+
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    logger.info({ port: PORT, env: process.env.NODE_ENV || 'development' },
+        `Server listening on http://localhost:${PORT}`);
+});
+
+// Last-resort handlers for unhandled errors — make sure they end up in the
+// logger (with stack traces) instead of being silently swallowed by Node.
+process.on('uncaughtException', (err) => {
+    logger.fatal({ err }, 'uncaughtException');
+    process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+    logger.error({ reason }, 'unhandledRejection');
 });
 
 /*
