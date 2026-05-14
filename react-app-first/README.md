@@ -1,151 +1,101 @@
-# React App First — Healthy Habits Demo
+# React App First — Learning Sandbox
 
-A small full-stack React + Vite + Express + SQLite project. The frontend is a
-"Want to be healthy?" landing page with **Exercise** and **Food** sub-pages,
-plus auth (Login / Sign Up) protected by a CAPTCHA.
+A small full-stack project I built to learn three things in parallel: modern frontend with React/TypeScript, web app security, and relational databases. Everything in here is intentional practice rather than production code.
 
----
+## What I'm learning
 
-## Project structure
+### TypeScript & React (frontend)
 
-```
-react-app-first/
-├── src/                # React frontend (Vite)
-├── my-api/             # Express + SQLite backend (port 5000)
-└── ../database/        # SQLite database + schema (created on first run)
-```
+Learning by building a multi-page app with auth, route guards, and a real API.
 
-The frontend runs on `http://localhost:5173` (Vite default) and talks to the
-backend on `http://localhost:5000`.
+- React 19 hooks (`useState`, `useEffect`, `useContext`)
+- React Router — routes, `Navigate`, `useLocation`, route guards
+- Component composition, props, controlled forms
+- Context API for global auth state (`AuthContext`)
+- Vite + ESLint tooling
+- (Currently JavaScript / JSX — TypeScript migration is next.)
 
----
+### Cybersecurity
 
-## Prerequisites
+Hardening the API one layer at a time. Each fix is documented as a "lab" in [CyberSecurity101.md](./CyberSecurity101.md).
 
-- **Node.js** 18+ (check with `node -v`)
-- **npm** 9+ (comes with Node) or any equivalent (pnpm / yarn)
-- A terminal — PowerShell, Command Prompt, Git Bash, or any shell
+- Server-side CAPTCHA (never trust client-only checks)
+- JWT in `HttpOnly` cookies instead of `localStorage` (XSS defense)
+- Auth middleware + role-based access (`requireAuth`, `requireRole`)
+- Frontend route guards as UX (not security)
+- `helmet` security headers + tightened CORS
+- Rate limiting on login / signup / captcha (`express-rate-limit`)
+- Input validation with `zod` + mass-assignment defense (`.strict()`)
+- Secrets in `.env`, validated on startup
+- Structured logging (`pino`) + audit trail of auth events
+- `npm audit` for dependency CVEs, OWASP ZAP for dynamic scanning
 
----
+### Database
 
-## How to open & run the project from the terminal
+Practicing SQL and schema design against a real domain (users, exercises, foods, recipes, logs). Full write-up in [Database101.md](./Database101.md).
 
-You'll need **two terminals**: one for the backend, one for the frontend.
+- Schema design: primary keys, foreign keys, `CHECK` / `NOT NULL` / `UNIQUE`
+- Relationships: 1-to-many (recipe → steps), many-to-many (favorites)
+- SQL: `SELECT`, `INSERT`, `UPDATE`, `DELETE`, `JOIN`, `GROUP BY`, aggregates
+- Indexes, `EXPLAIN QUERY PLAN`, normalization
+- Transactions and ACID
+- Parameterized queries (SQL injection prevention)
+- Common pitfalls: N+1 queries, missing indexes
 
-### 1. Open the project folder
-
-```bash
-cd E:\app\demo1\App-Demo1\react-app-first
-```
-
-> On macOS / Linux replace the path with wherever you cloned the repo, e.g.
-> `cd ~/projects/react-app-first`.
-
-### 2. Install dependencies (first time only)
-
-Frontend:
-
-```bash
-npm install
-```
-
-Backend:
+## Quick start
 
 ```bash
+# Backend (terminal #1)
 cd my-api
 npm install
-cd ..
+npm run seed       # populate mock data
+npm start          # API on :5000
+
+# Frontend (terminal #2, from project root)
+npm install
+npm run dev        # app on :5173
 ```
 
-### 3. Start the backend (Terminal #1)
+Demo logins are in `my-api/seed.js` (try `admin@demo.com` for admin features).
 
-```bash
-cd my-api
-npm start
-```
+## Stack
 
-You should see:
+- **Frontend** — React 19, Vite, React Router
+- **Backend** — Node + Express 5, SQLite (`better-sqlite3`)
+- **Auth** — bcryptjs + jsonwebtoken + HttpOnly cookies + zod
+- **Security** — helmet, express-rate-limit, server-side captcha
+- **Logging** — pino + pino-http
 
-```
-Server running on http://localhost:5000
-```
+## What's next (future learning)
 
-Leave this terminal running.
+Things to add when I'm ready to push each track further.
 
-### 4. Start the frontend (Terminal #2)
+### TypeScript & React
 
-Open a **new** terminal window in the project root and run:
+- Migrate the whole app to TypeScript (start with `.jsx → .tsx`, add `tsconfig.json`)
+- Add tests with Vitest + React Testing Library
+- Server-state library (TanStack Query) instead of raw `fetch`
+- Forms with `react-hook-form` + `zod` (share schemas with the backend)
+- Accessibility audit (axe-core, keyboard nav, ARIA)
+- Storybook for component-level dev
 
-```bash
-npm run dev
-```
+### Cybersecurity
 
-Vite will print something like:
+- HTTPS locally with `mkcert`, then HSTS in prod
+- CSRF tokens for state-changing requests (defense beyond `SameSite=Lax`)
+- Refresh tokens + server-side revocation (true logout-all-devices)
+- Content Security Policy on the frontend bundle
+- 2FA / MFA on login (TOTP via `otplib`)
+- Password reset flow (single-use, time-limited token — same pattern as captcha)
+- Sentry / error tracking for unhandled exceptions
+- Ship logs off the box (Loki + Grafana, or a hosted aggregator)
+- GitHub Actions: `npm audit` on every PR + ZAP baseline scan
 
-```
-  VITE v8.x.x  ready in 400 ms
-  ➜  Local:   http://localhost:5173/
-```
+### Database
 
-Open that URL in your browser. The app is now live.
-
----
-
-## Available scripts
-
-### Frontend (`react-app-first/`)
-
-| Command          | What it does                                    |
-| ---------------- | ----------------------------------------------- |
-| `npm run dev`    | Start the Vite dev server with hot reload       |
-| `npm run build`  | Build the production bundle into `dist/`        |
-| `npm run preview`| Preview the production build locally            |
-| `npm run lint`   | Run ESLint over the source                      |
-
-### Backend (`react-app-first/my-api/`)
-
-| Command       | What it does                          |
-| ------------- | ------------------------------------- |
-| `npm start`   | Start the Express API on port 5000    |
-
----
-
-## Routes
-
-| Path         | Page                                       |
-| ------------ | ------------------------------------------ |
-| `/`          | Home — "Want to be healthy?" landing       |
-| `/exercise`  | Exercise plan                              |
-| `/food`      | Food / calorie tracking                    |
-| `/about`     | About                                      |
-| `/contact`   | Contact                                    |
-| `/login`     | Log in (CAPTCHA required)                  |
-| `/signup`    | Sign up (CAPTCHA required)                 |
-
-## API endpoints
-
-| Method | Path              | Description                         |
-| ------ | ----------------- | ----------------------------------- |
-| POST   | `/api/signup`     | Create a new user (role hardcoded)  |
-| POST   | `/api/login`      | Log in with email + password        |
-| GET    | `/api/users`      | List users (debug helper)           |
-| GET    | `/api/activities` | Get demo activities                 |
-| PUT    | `/api/activities/:id` | Update activity status          |
-
----
-
-## Stopping the servers
-
-In each terminal, press **Ctrl + C** to stop the running process.
-
-## Troubleshooting
-
-- **"Could not reach the server"** on Login/Signup → make sure the backend
-  terminal is still running on port 5000.
-- **Port 5000 already in use** → another process owns it. Either stop that
-  process or change `PORT` in `my-api/server.js`.
-- **`better-sqlite3` install fails** → it needs build tools. On Windows run
-  `npm install --global windows-build-tools` once, or install the prebuilt
-  binary by re-running `npm install` after upgrading Node.
-- **Port 5173 already in use** → Vite will offer to use the next free port;
-  just press `y`.
+- Migrations tool (Knex / `node-pg-migrate`) instead of editing `schema.sql`
+- Move from SQLite to PostgreSQL (real types, JSONB, full-text search)
+- Window functions, CTEs, views — and recursive CTEs for hierarchical data
+- Backup + restore drill (proven, not assumed)
+- Try an ORM (Prisma, Drizzle, or Kysely) and compare to raw SQL
+- Add a search index (FTS5 in SQLite, or Postgres `tsvector`)
