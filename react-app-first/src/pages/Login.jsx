@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import SimpleCaptcha from '../components/Captcha';
 import { useAuth } from '../auth/AuthContext';
 
 function Login() {
@@ -23,16 +22,6 @@ function Login() {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // Captcha state. The server is the source of truth — we just collect
-    // {id, answer} from the component and send them on submit.
-    const [captcha, setCaptcha] = useState({ id: null, answer: '' });
-
-    // Bumping this remounts <SimpleCaptcha />, which causes it to fetch
-    // a fresh challenge. We do this after every failed submit because the
-    // server burns the captcha on each verify attempt.
-    const [captchaKey, setCaptchaKey] = useState(0);
-    const refreshCaptcha = () => setCaptchaKey((k) => k + 1);
-
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
@@ -41,11 +30,6 @@ function Login() {
         e.preventDefault();
         setError(null);
         setMessage(null);
-
-        if (!captcha.id || !captcha.answer) {
-            setError('Please enter the captcha code.');
-            return;
-        }
 
         setLoading(true);
 
@@ -60,15 +44,12 @@ function Login() {
                 body: JSON.stringify({
                     email: form.email,
                     password: form.password,
-                    captchaId: captcha.id,
-                    captchaAnswer: captcha.answer,
                 }),
             });
             const data = await res.json();
 
             if (!res.ok) {
                 setError(data.error || 'Login failed.');
-                refreshCaptcha(); // server consumed the previous one
             } else {
                 // No more localStorage. The session lives in an HttpOnly
                 // cookie that JS cannot read. We only keep the user object
@@ -79,13 +60,12 @@ function Login() {
             }
         } catch (err) {
             setError('Could not reach the server. Is the API running on port 5000?');
-            refreshCaptcha();
         } finally {
             setLoading(false);
         }
     };
 
-    const canSubmit = !loading && captcha.id && captcha.answer.length > 0;
+    const canSubmit = !loading && form.email && form.password;
 
     return (
         <main className="auth-page">
@@ -113,8 +93,6 @@ function Login() {
                         required
                     />
                 </label>
-
-                <SimpleCaptcha key={captchaKey} onChange={setCaptcha} />
 
                 <button type="submit" disabled={!canSubmit}>
                     {loading ? 'Signing in...' : 'Log In'}

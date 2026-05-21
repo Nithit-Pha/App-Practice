@@ -448,3 +448,165 @@
 .admin-table tbody tr:hover {
   background-color: hsl(0, 0%, 98%);
 }
+
+/* ---------- Chatbot widget ---------- */
+.chatbot-wrapper {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.chatbot-toggle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background-color: hsl(210, 70%, 50%);
+  color: white;
+  font-size: 1.6em;
+  cursor: pointer;
+  box-shadow: 0 4px 12px hsla(0, 0%, 0%, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 200ms, background-color 200ms;
+}
+
+.chatbot-toggle:hover {
+  background-color: hsl(210, 70%, 42%);
+  transform: scale(1.05);
+}
+
+.chatbot-window {
+  position: absolute;
+  bottom: 72px;
+  right: 0;
+  width: 340px;
+  max-width: calc(100vw - 40px);
+  height: 480px;
+  max-height: calc(100vh - 120px);
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px hsla(0, 0%, 0%, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid hsl(0, 0%, 88%);
+}
+
+.chatbot-header {
+  background-color: hsl(210, 70%, 50%);
+  color: white;
+  padding: 12px 16px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chatbot-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.4em;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.chatbot-close:hover {
+  opacity: 0.8;
+}
+
+.chatbot-body {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: hsl(0, 0%, 98%);
+}
+
+.chatbot-msg {
+  padding: 8px 12px;
+  border-radius: 14px;
+  max-width: 85%;
+  font-size: 0.92em;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.chatbot-msg-bot {
+  align-self: flex-start;
+  background-color: hsl(0, 0%, 92%);
+  color: hsl(0, 0%, 20%);
+  border-bottom-left-radius: 4px;
+}
+
+.chatbot-msg-user {
+  align-self: flex-end;
+  background-color: hsl(210, 70%, 50%);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.chatbot-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+  border-top: 1px solid hsl(0, 0%, 90%);
+  background-color: white;
+}
+
+.chatbot-suggestion {
+  background-color: hsl(210, 50%, 95%);
+  color: hsl(210, 70%, 40%);
+  border: 1px solid hsl(210, 50%, 85%);
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+.chatbot-suggestion:hover {
+  background-color: hsl(210, 60%, 90%);
+}
+
+.chatbot-form {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  border-top: 1px solid hsl(0, 0%, 90%);
+  background-color: white;
+}
+
+.chatbot-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid hsl(0, 0%, 80%);
+  border-radius: 18px;
+  font-size: 0.95em;
+  outline: none;
+}
+
+.chatbot-input:focus {
+  border-color: hsl(210, 70%, 50%);
+}
+
+.chatbot-send {
+  background-color: hsl(210, 70%, 50%);
+  color: white;
+  border: none;
+  border-radius: 18px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.95em;
+}
+
+.chatbot-send:hover {
+  background-color: hsl(210, 70%, 42%);
+}
